@@ -12,6 +12,9 @@
 # See README.md for per-platform notes, especially for Docker Desktop on
 # macOS where host networking must be enabled explicitly.
 
+networks:
+  proxy:
+    external: true
 
 services:
 
@@ -42,13 +45,15 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
 
   avahi:
-    image: ghcr.io/momenbasel/timenest-avahi:latest
     build:
       context: .
       dockerfile: Dockerfile
       target: avahi
+    image: ghcr.io/momenbasel/timenest-avahi:latest
     container_name: timenest-avahi
     restart: unless-stopped
     network_mode: host
@@ -61,6 +66,8 @@ services:
       - ./data/config:/etc/timenest:ro
     depends_on:
       - samba
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
 
   web:
     build:
@@ -69,8 +76,8 @@ services:
     image: ghcr.io/momenbasel/timenest-web:latest
     container_name: timenest-web
     restart: unless-stopped
-    ports:
-      - "${WEB_PORT:-8080}:8080"
+    networks:
+      - proxy
     environment:
       ADMIN_USER: ${ADMIN_USER:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD must be set in .env}
@@ -97,3 +104,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    labels:
+      com.centurylinklabs.watchtower.enable: "false"
+      traefik.enable: true
+      traefik.http.routers.timenest.rule: Host(`timenest.ferris-s.de`)
+      traefik.http.services.timenest.loadbalancer.server.port: 8080
