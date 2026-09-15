@@ -10,6 +10,9 @@
 
 set -euo pipefail
 
+# shellcheck source=scripts/accounts.sh
+source /usr/local/lib/timenest/accounts.sh
+
 log() { printf '[create-user] %s\n' "$*"; }
 die() { printf '[create-user] ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -32,12 +35,10 @@ fi
 USER_DIR="/backup/${USERNAME}"
 SHARE_CONF="/etc/timenest/shares.d/${USERNAME}.conf"
 
-# System user creation is required so Samba's `valid users = ${USERNAME}`
-# resolves. No shell, no home dir outside /backup.
-if ! id "$USERNAME" &>/dev/null; then
-    log "creating POSIX user '${USERNAME}'"
-    useradd --system --no-create-home --shell /usr/sbin/nologin "$USERNAME"
-fi
+# A unix user is required so Samba's `valid users = ${USERNAME}` resolves.
+# Registered in the persisted account list so it survives recreates.
+log "ensuring POSIX user '${USERNAME}'"
+account_ensure "$USERNAME"
 
 # smbpasswd -a is idempotent; -x removes.
 log "setting Samba password for '${USERNAME}'"

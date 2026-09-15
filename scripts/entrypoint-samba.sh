@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# shellcheck source=scripts/accounts.sh
+source /usr/local/lib/timenest/accounts.sh
+
 log() { printf '[samba] %s\n' "$*"; }
 die() { printf '[samba] ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -62,6 +65,11 @@ if [[ ! -s /var/lib/samba/passdb.tdb ]]; then
     log "initializing fresh passdb"
     touch /var/lib/samba/smbpasswd
 fi
+
+# Unix accounts live in the container layer; recreate them from the
+# persisted registry so tdbsam users can log in again.
+accounts_restore
+log "restored POSIX accounts: $(cut -d: -f1 "$ACCOUNTS_FILE" 2>/dev/null | xargs)"
 
 # Verify the config parses before we exec smbd. A bad template means no
 # restart loop panic - we fail fast with a readable error.

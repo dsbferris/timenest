@@ -8,6 +8,9 @@
 
 set -euo pipefail
 
+# shellcheck source=scripts/accounts.sh
+source /usr/local/lib/timenest/accounts.sh
+
 log() { printf '[delete-user] %s\n' "$*"; }
 die() { printf '[delete-user] ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -28,9 +31,9 @@ USER_DIR="/backup/${USERNAME}"
 if id "$USERNAME" &>/dev/null; then
     log "removing Samba password for '${USERNAME}'"
     smbpasswd -x "$USERNAME" || true
-    log "removing POSIX user '${USERNAME}'"
-    userdel "$USERNAME" || true
 fi
+log "removing POSIX user '${USERNAME}'"
+account_remove "$USERNAME"
 
 rm -f "$SHARE_CONF"
 log "removed ${SHARE_CONF}"
