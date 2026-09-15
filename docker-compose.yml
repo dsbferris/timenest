@@ -37,7 +37,7 @@ services:
       - ./data/samba:/var/lib/samba
       - ./data/config:/etc/timenest
     healthcheck:
-      test: ["CMD", "smbclient", "-L", "//localhost", "-N"]
+      test: ["CMD", "smbstatus", "-b"]
       interval: 30s
       timeout: 5s
       retries: 3
