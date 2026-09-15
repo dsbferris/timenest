@@ -135,6 +135,10 @@ else
     ok "wrote .env"
 fi
 
+mkdir -p data/{config,samba,web}
+cp samba/smb.conf.template data/config/smb.conf.template
+cp avahi/timenest.service.template data/config/timenest.service.template
+
 # ---------------------------------------------------------------------------
 # Launch
 # ---------------------------------------------------------------------------
