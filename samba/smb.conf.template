@@ -43,7 +43,7 @@
     # --- Time Machine performance tuning ---
     # Apple explicitly recommends these (see Samba manual, fruit section).
     strict locking = no
-    strict sync = no
+    strict sync = yes
     sync always = no
     use sendfile = yes
     min receivefile size = 16384
