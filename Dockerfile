@@ -8,12 +8,16 @@
 #
 # Built for linux/amd64, linux/arm64, and linux/arm/v7 via buildx in CI.
 
-ARG DEBIAN_VERSION=bookworm-slim
+# ARG BASE_IMAGE=debian
+# ARG DEBIAN_VERSION=bookworm-slim
+
+ARG BASE_IMAGE=ubuntu
+ARG DEBIAN_VERSION=resolute
 
 # ---------------------------------------------------------------------------
 # Stage: samba
 # ---------------------------------------------------------------------------
-FROM debian:${DEBIAN_VERSION} AS samba
+FROM ${BASE_IMAGE}:${DEBIAN_VERSION} AS samba
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
@@ -50,7 +54,7 @@ CMD ["/usr/local/bin/entrypoint-samba.sh"]
 # ---------------------------------------------------------------------------
 # Stage: avahi
 # ---------------------------------------------------------------------------
-FROM debian:${DEBIAN_VERSION} AS avahi
+FROM ${BASE_IMAGE}:${DEBIAN_VERSION} AS avahi
 
 ENV DEBIAN_FRONTEND=noninteractive \
     LANG=C.UTF-8
