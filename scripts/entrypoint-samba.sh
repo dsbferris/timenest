@@ -83,7 +83,7 @@ shutdown() {
 trap shutdown TERM INT
 
 log "starting smbd (foreground)"
-smbd --foreground --log-stdout --no-process-group --configfile=/etc/samba/smb.conf &
+smbd --foreground --debug-stdout --no-process-group --configfile=/etc/samba/smb.conf &
 SMBD_PID=$!
 
 wait "$SMBD_PID"
