@@ -78,7 +78,7 @@
     vfs objects = catia fruit streams_xattr
 
     # --- include per-user share fragments ---
-    include = /etc/timenest/shares.d/*.conf
+    include = /etc/timenest/shares.d/%U.conf
 
 # Shares are in /etc/timenest/shares.d/<username>.conf and look like:
 #
