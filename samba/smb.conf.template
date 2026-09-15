@@ -88,8 +88,8 @@
 #     read only = no
 #     inherit acls = yes
 #     inherit permissions = yes
-#     create mask = 0600
-#     directory mask = 0700
+#     create mask = 0640      # 0600 without HOST_READ_GID
+#     directory mask = 0750   # 0700 without HOST_READ_GID
 #     ea support = yes
 #     kernel oplocks = no
 #     kernel share modes = no

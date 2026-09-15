@@ -30,6 +30,7 @@ services:
       SERVER_NAME: ${SERVER_NAME:-TimeNest}
       DEVICE_MODEL: ${DEVICE_MODEL:-TimeCapsule8,119}
       SMB_INTERFACES: ${SMB_INTERFACES:-}
+      HOST_READ_GID: ${HOST_READ_GID:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       TZ: ${TIMEZONE:-UTC}
     volumes:

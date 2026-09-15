@@ -44,9 +44,23 @@ account_ensure "$USERNAME"
 log "setting Samba password for '${USERNAME}'"
 ( echo "$PASSWORD"; echo "$PASSWORD" ) | smbpasswd -s -a "$USERNAME"
 
+# With HOST_READ_GID set the share is owned by that group and stays
+# group-readable, so the matching host user can read the backups directly.
+SHARE_GROUP="$(host_group_ensure)"
+if [[ -n "$SHARE_GROUP" ]]; then
+    DIR_MODE=0750
+    CREATE_MASK=0640
+    DIRECTORY_MASK=0750
+else
+    SHARE_GROUP="$USERNAME"
+    DIR_MODE=0700
+    CREATE_MASK=0600
+    DIRECTORY_MASK=0700
+fi
+
 mkdir -p "$USER_DIR"
-chown "${USERNAME}:${USERNAME}" "$USER_DIR"
-chmod 0700 "$USER_DIR"
+chown "${USERNAME}:${SHARE_GROUP}" "$USER_DIR"
+chmod "$DIR_MODE" "$USER_DIR"
 
 # Render share fragment. The TM max-size parameter is what Samba reports
 # back to macOS as available space for backups; the filesystem itself is
@@ -58,13 +72,13 @@ cat > "$SHARE_CONF" <<EOF
     path = /backup/${USERNAME}
     valid users = ${USERNAME}
     force user = ${USERNAME}
-    force group = ${USERNAME}
+    force group = ${SHARE_GROUP}
     read only = no
     browseable = yes
     inherit acls = yes
     inherit permissions = yes
-    create mask = 0600
-    directory mask = 0700
+    create mask = ${CREATE_MASK}
+    directory mask = ${DIRECTORY_MASK}
     ea support = yes
     kernel oplocks = no
     kernel share modes = no

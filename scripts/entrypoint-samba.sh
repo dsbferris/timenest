@@ -68,6 +68,7 @@ fi
 
 # Unix accounts live in the container layer; recreate them from the
 # persisted registry so tdbsam users can log in again.
+host_group_ensure > /dev/null
 accounts_restore
 log "restored POSIX accounts: $(cut -d: -f1 "$ACCOUNTS_FILE" 2>/dev/null | xargs)"
 

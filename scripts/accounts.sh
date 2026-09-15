@@ -13,6 +13,7 @@
 
 ACCOUNTS_FILE="${ACCOUNTS_FILE:-/var/lib/samba/timenest-accounts}"
 ACCOUNTS_MIN_ID=10000
+HOST_GROUP_NAME=tnhost
 
 account_id() {
     awk -F: -v u="$1" '$1 == u { print $2 }' "$ACCOUNTS_FILE" 2>/dev/null
@@ -38,6 +39,20 @@ account_remove() {
     getent group "$name" >/dev/null && groupdel "$name"
     [[ -f "$ACCOUNTS_FILE" ]] && sed -i "/^${name}:/d" "$ACCOUNTS_FILE"
     return 0
+}
+
+# Group that owns the share contents, so a host user with this gid can read
+# the backups. Falls back to the per-user group when HOST_READ_GID is unset.
+# Echoes the group name, or nothing.
+host_group_ensure() {
+    local existing
+    [[ -n "${HOST_READ_GID:-}" ]] || return 0
+    existing="$(getent group "$HOST_READ_GID" | cut -d: -f1)"
+    if [[ -z "$existing" ]]; then
+        groupadd --gid "$HOST_READ_GID" "$HOST_GROUP_NAME"
+        existing="$HOST_GROUP_NAME"
+    fi
+    printf '%s\n' "$existing"
 }
 
 # Recreate every registered account. Called once at container start.
