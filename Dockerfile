@@ -72,7 +72,7 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY avahi/timenest.service.template /etc/timenest/timenest.service.template
-COPY avahi/avahi-daemon.conf /etc/avahi/avahi-daemon.conf
+COPY avahi/avahi-daemon.conf.template /usr/local/share/timenest/avahi-daemon.conf.template
 COPY scripts/entrypoint-avahi.sh /usr/local/bin/entrypoint-avahi.sh
 RUN chmod +x /usr/local/bin/entrypoint-avahi.sh
 

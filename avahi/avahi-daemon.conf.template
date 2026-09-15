@@ -7,8 +7,12 @@
 [server]
 use-ipv4=yes
 use-ipv6=yes
-allow-interfaces=
-deny-interfaces=docker0,docker_gwbridge,veth*,br-*
+# Rendered at start by entrypoint-avahi.sh. avahi matches interface names
+# exactly - it has no globbing - so listing the LAN interface in
+# AVAHI_INTERFACES is the only reliable way to keep advertisements off the
+# docker bridges.
+allow-interfaces=${AVAHI_INTERFACES}
+deny-interfaces=docker0,docker_gwbridge
 ratelimit-interval-usec=1000000
 ratelimit-burst=1000
 cache-entries-max=4096
