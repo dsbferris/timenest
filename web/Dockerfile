@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 ARG TARGETARCH
-ARG DOCKER_CLI_VERSION=27.3.1
+ARG DOCKER_CLI_VERSION=29.8.1
 
 # We need the docker CLI (only, not the daemon) so the web container can run
 # `docker exec timenest-samba ...` against the host docker.sock. The Debian
