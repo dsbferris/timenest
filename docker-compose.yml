@@ -18,8 +18,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        TARGETARCH: ${TARGETARCH:-}
+      target: samba
     image: ghcr.io/momenbasel/timenest-samba:latest
     container_name: timenest-samba
     restart: unless-stopped
