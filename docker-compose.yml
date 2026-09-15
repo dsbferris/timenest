@@ -65,6 +65,7 @@ services:
   web:
     build:
       context: ./web
+      dockerfile: Dockerfile
     image: ghcr.io/momenbasel/timenest-web:latest
     container_name: timenest-web
     restart: unless-stopped
