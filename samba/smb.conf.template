@@ -64,7 +64,7 @@
     # --- authentication ---
     passdb backend = tdbsam:/var/lib/samba/passdb.tdb
     security = user
-    encrypt passwords = yes
+    # encrypt passwords = yes # deprecated, default yes
     smb passwd file = /var/lib/samba/smbpasswd
 
     # --- disable legacy and noisy features ---
