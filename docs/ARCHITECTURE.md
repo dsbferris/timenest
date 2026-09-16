@@ -46,7 +46,7 @@ flowchart TB
 1. **Samba container** is the only component that touches the backup drive with write permissions. Everything else mounts it read-only.
 2. **Avahi container** never touches the drive. Its only job is to scream on UDP/5353.
 3. **Web container** has one write mount (`./data/web` for its session secret and SQLite metadata cache). It talks to Samba only via `docker exec` - it never binds a second Samba listener.
-4. **Admin auth** is bcrypt-hashed at startup from the `.env` value. Rotating the password simply requires editing `.env` and `docker compose up -d web`; all existing sessions are invalidated because the session secret file lives under the web data volume and is regenerated if the password changes.
+4. **Admin auth** compares the submitted credentials against the `.env` values in constant time; nothing is persisted. Rotating the password means editing `.env` and `docker compose up -d web`. Note that this does *not* sign existing sessions out: the session secret is a random value stored at `./data/web/.session_secret` so that container updates don't log everyone out, and it is independent of the password. To invalidate every session, delete that file before restarting.
 
 ## Why SMB, not AFP
 

@@ -406,7 +406,8 @@ Equally useful as a **Mac mini backup server**, a **Raspberry Pi Time Machine se
 - TimeNest exposes Samba on TCP/445 and the web UI on TCP/8080. Do not port-forward either to the internet. For remote backups use Tailscale, WireGuard, or a VPN.
 - SMB signing is enabled by default. SMB1 is disabled. TLS on the web UI is handled via a reverse proxy (a Caddy example is provided in `docs/`).
 - TimeNest never reads backup contents. Time Machine sparsebundles can be fully encrypted at creation time on the Mac side and you are encouraged to do so.
-- Admin credentials are stored as bcrypt hashes under `./data/auth.db`. Samba users are stored in Samba's native `passdb.tdb`.
+- The admin credentials are the `ADMIN_USER`/`ADMIN_PASSWORD` values from your `.env`; they are read from the environment and compared in constant time, never persisted by the web container. Samba users are stored in Samba's native `passdb.tdb`.
+- `/metrics` requires a signed-in session or `Authorization: Bearer $METRICS_TOKEN`. It reports usernames, per-user backup sizes and free space, so treat the token like a password.
 
 ### Verifying release artifacts
 
