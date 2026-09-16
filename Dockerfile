@@ -41,11 +41,13 @@ COPY scripts/entrypoint-samba.sh /usr/local/bin/entrypoint-samba.sh
 COPY scripts/create-user.sh     /usr/local/bin/create-user.sh
 COPY scripts/delete-user.sh     /usr/local/bin/delete-user.sh
 COPY scripts/render-smb-conf.sh /usr/local/bin/render-smb-conf.sh
+COPY scripts/healthcheck-samba.sh /usr/local/bin/healthcheck-samba.sh
 COPY scripts/accounts.sh        /usr/local/lib/timenest/accounts.sh
 RUN chmod +x /usr/local/bin/entrypoint-samba.sh \
              /usr/local/bin/create-user.sh \
              /usr/local/bin/delete-user.sh \
-             /usr/local/bin/render-smb-conf.sh
+             /usr/local/bin/render-smb-conf.sh \
+             /usr/local/bin/healthcheck-samba.sh
 
 EXPOSE 445
 

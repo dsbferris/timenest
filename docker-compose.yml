@@ -12,6 +12,10 @@
 # See README.md for per-platform notes, especially for Docker Desktop on
 # macOS where host networking must be enabled explicitly.
 
+networks:
+  proxy:
+    external: true
+
 services:
 
   samba:
@@ -38,9 +42,11 @@ services:
       - ./data/samba:/var/lib/samba
       - ./data/config:/etc/timenest
     healthcheck:
-      test: ["CMD", "smbstatus", "-b"]
+      # Parses smb.conf, checks 445 accepts connections and that smbstatus
+      # runs. See scripts/healthcheck-samba.sh for why all three are needed.
+      test: ["CMD", "/usr/local/bin/healthcheck-samba.sh"]
       interval: 30s
-      timeout: 5s
+      timeout: 10s
       retries: 3
 
   avahi:
@@ -85,7 +91,6 @@ services:
     volumes:
       - ${BACKUP_PATH:?BACKUP_PATH must be set in .env}:/backup:ro
       - ./data/web:/data
-      - ./data/samba:/samba:ro
       - ./data/config:/config:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
