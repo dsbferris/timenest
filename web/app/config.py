@@ -19,7 +19,9 @@ class Settings(BaseSettings):
     default_quota_gb: int = Field(default=500, alias="DEFAULT_QUOTA_GB")
 
     samba_container: str = Field(default="timenest-samba", alias="SAMBA_CONTAINER")
-    samba_data_path: Path = Field(default=Path("/samba"), alias="SAMBA_DATA_PATH")
+    # Where the samba container's share fragments show up in this container.
+    # compose mounts ./data/config as /config:ro.
+    shares_path: Path = Field(default=Path("/config/shares.d"), alias="SHARES_PATH")
 
     enable_metrics: bool = Field(default=True, alias="ENABLE_METRICS")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")

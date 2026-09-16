@@ -82,22 +82,3 @@
     # a session is authenticated, so per-user includes are invisible to share
     # enumeration and to the Time Machine picker. render-smb-conf.sh inlines
     # the fragments below this line instead.
-
-# Shares are in /etc/timenest/shares.d/<username>.conf and look like:
-#
-# [username]
-#     path = /backup/username
-#     valid users = username
-#     read only = no
-#     inherit acls = yes
-#     inherit permissions = yes
-#     create mask = 0640      # 0600 without HOST_READ_GID
-#     directory mask = 0750   # 0700 without HOST_READ_GID
-#     ea support = yes
-#     kernel oplocks = no
-#     kernel share modes = no
-#     posix locking = no
-#     fruit:time machine = yes
-#     fruit:time machine max size = 500G
-#     durable handles = yes
-#     vfs objects = catia fruit streams_xattr

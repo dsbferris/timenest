@@ -71,19 +71,9 @@ class SambaManager:
         await self._exec(*args)
 
     def list_users(self) -> list[TimeNestUser]:
-        shares_dir = self.settings.samba_data_path / ".." / "config" / "shares.d"
-        # When the web container mounts `./data/config` as /config we fall
-        # back to that path. Keep resolution loose.
-        for candidate in (
-            shares_dir.resolve(),
-            Path("/etc/timenest/shares.d"),
-            Path("/config/shares.d"),
-            Path("/data/config/shares.d"),
-        ):
-            if candidate.is_dir():
-                shares_dir = candidate
-                break
-        else:
+        shares_dir = self.settings.shares_path
+        if not shares_dir.is_dir():
+            log.warning("shares directory %s is not mounted", shares_dir)
             return []
 
         users: list[TimeNestUser] = []
