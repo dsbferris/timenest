@@ -15,48 +15,12 @@ log() { printf '[samba] %s\n' "$*"; }
 die() { printf '[samba] ERROR: %s\n' "$*" >&2; exit 1; }
 
 # ---------------------------------------------------------------------------
-# Env defaults
-# ---------------------------------------------------------------------------
-: "${SERVER_NAME:=TimeNest}"
-: "${DEVICE_MODEL:=TimeCapsule8,119}"
-: "${SMB_INTERFACES:=}"
-: "${LOG_LEVEL:=INFO}"
-
-# Map human log levels to Samba's numeric scale.
-case "${LOG_LEVEL^^}" in
-    DEBUG)   SAMBA_LOG_LEVEL=3 ;;
-    INFO)    SAMBA_LOG_LEVEL=1 ;;
-    WARNING) SAMBA_LOG_LEVEL=1 ;;
-    ERROR)   SAMBA_LOG_LEVEL=0 ;;
-    *)       SAMBA_LOG_LEVEL=1 ;;
-esac
-export SAMBA_LOG_LEVEL
-
-# `bind interfaces only` makes sense only when interfaces are given.
-if [[ -n "$SMB_INTERFACES" ]]; then
-    BIND_INTERFACES_ONLY=yes
-else
-    BIND_INTERFACES_ONLY=no
-    SMB_INTERFACES=""
-fi
-export BIND_INTERFACES_ONLY SMB_INTERFACES
-export SERVER_NAME DEVICE_MODEL
-
-# ---------------------------------------------------------------------------
 # Filesystem layout
 # ---------------------------------------------------------------------------
 mkdir -p /etc/samba /etc/timenest/shares.d /var/lib/samba/private /var/log/samba /backup
 
-# The template uses ${VAR} syntax - envsubst only replaces explicitly
-# listed vars to avoid accidentally eating literal `$` in comments.
-# shellcheck disable=SC2016  # single quotes intentional; envsubst reads literal ${VAR} list
-envsubst '${SERVER_NAME} ${DEVICE_MODEL} ${SMB_INTERFACES} ${BIND_INTERFACES_ONLY} ${SAMBA_LOG_LEVEL}' \
-    < /etc/timenest/smb.conf.template \
-    > /etc/samba/smb.conf
-
-log "rendered /etc/samba/smb.conf"
 log "backing up to /backup (host BACKUP_PATH)"
-log "advertising as '${SERVER_NAME}' / model '${DEVICE_MODEL}'"
+log "advertising as '${SERVER_NAME:-TimeNest}' / model '${DEVICE_MODEL:-TimeCapsule8,119}'"
 
 # ---------------------------------------------------------------------------
 # Seed passdb on first boot so `net` commands do not complain.
@@ -72,13 +36,12 @@ host_group_ensure > /dev/null
 accounts_restore
 log "restored POSIX accounts: $(cut -d: -f1 "$ACCOUNTS_FILE" 2>/dev/null | xargs)"
 
-# Verify the config parses before we exec smbd. A bad template means no
-# restart loop panic - we fail fast with a readable error.
-if ! testparm -s /etc/samba/smb.conf > /dev/null 2>&1; then
-    log "testparm output:"
-    testparm -s /etc/samba/smb.conf || true
-    die "smb.conf failed to parse; refusing to start"
-fi
+# Render smb.conf from the template plus every share fragment. The script
+# validates with testparm before publishing, so a bad fragment fails fast
+# here with a readable error instead of looping the container.
+# smbd is not up yet, so there is nothing to signal.
+/usr/local/bin/render-smb-conf.sh --no-reload \
+    || die "smb.conf failed to render; refusing to start"
 
 # ---------------------------------------------------------------------------
 # Handle SIGTERM cleanly - smbd's default is graceful on SIGTERM.

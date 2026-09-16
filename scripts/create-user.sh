@@ -91,10 +91,8 @@ EOF
 
 log "wrote ${SHARE_CONF} (quota ${QUOTA_GB}G)"
 
-# Reload Samba in place (SIGHUP). No restart required.
-if pidof smbd >/dev/null; then
-    log "reloading smbd"
-    pkill -HUP smbd || true
-fi
+# Inline every fragment into smb.conf and SIGHUP smbd. A SIGHUP alone is not
+# enough: the fragments are not `include`d, they are rendered into the file.
+/usr/local/bin/render-smb-conf.sh
 
 log "done"

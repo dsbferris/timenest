@@ -28,25 +28,31 @@ fi
 SHARE_CONF="/etc/timenest/shares.d/${USERNAME}.conf"
 USER_DIR="/backup/${USERNAME}"
 
-if id "$USERNAME" &>/dev/null; then
-    log "removing Samba password for '${USERNAME}'"
-    smbpasswd -x "$USERNAME" || true
+if [[ -n "$PURGE" && "$PURGE" != "--purge" ]]; then
+    die "unknown option: ${PURGE}"
 fi
+
+# Unconditional: a tdbsam record outlives a POSIX user that was never
+# restored, and gating this on `id` would leak the password entry.
+log "removing Samba password for '${USERNAME}'"
+smbpasswd -x "$USERNAME" || true
+
 log "removing POSIX user '${USERNAME}'"
 account_remove "$USERNAME"
 
 rm -f "$SHARE_CONF"
 log "removed ${SHARE_CONF}"
 
+# Drop the share from smb.conf before touching the data, so smbd stops
+# serving the path while we are deleting under it.
+/usr/local/bin/render-smb-conf.sh
+
 if [[ "$PURGE" == "--purge" ]]; then
     log "purging backup directory (${USER_DIR})"
     rm -rf -- "$USER_DIR"
+    log "purged ${USER_DIR}"
 else
     log "leaving backup data at ${USER_DIR} untouched (pass --purge to wipe)"
-fi
-
-if pidof smbd >/dev/null; then
-    pkill -HUP smbd || true
 fi
 
 log "done"
