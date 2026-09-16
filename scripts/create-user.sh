@@ -3,7 +3,11 @@
 # Create a Time Machine user and a matching per-user Samba share fragment.
 #
 # Usage:
-#   create-user.sh <username> <password> <quota_gb>
+#   create-user.sh <username> <quota_gb>   # password on stdin
+#
+# The password is read from stdin, never passed as an argument: `docker exec`
+# argv is visible in `ps` to every user on the host and is recorded by the
+# docker daemon.
 #
 # Called by the web UI via `docker exec timenest-samba`. Idempotent: if the
 # user already exists the password is rotated and the quota updated.
@@ -16,13 +20,19 @@ source /usr/local/lib/timenest/accounts.sh
 log() { printf '[create-user] %s\n' "$*"; }
 die() { printf '[create-user] ERROR: %s\n' "$*" >&2; exit 1; }
 
-if [[ $# -ne 3 ]]; then
-    die "usage: $0 <username> <password> <quota_gb>"
+if [[ $# -ne 2 ]]; then
+    die "usage: $0 <username> <quota_gb>   (password on stdin)"
 fi
 
 USERNAME="$1"
-PASSWORD="$2"
-QUOTA_GB="$3"
+QUOTA_GB="$2"
+
+# -r so backslashes survive; no trailing newline is required, so tolerate
+# stdin that ends without one.
+IFS= read -r PASSWORD || true
+if [[ -z "$PASSWORD" ]]; then
+    die "empty password on stdin"
+fi
 
 # Username must be POSIX-safe and non-conflicting with system accounts.
 if [[ ! "$USERNAME" =~ ^[a-z_][a-z0-9_-]{0,31}$ ]]; then
@@ -42,7 +52,7 @@ account_ensure "$USERNAME"
 
 # smbpasswd -a is idempotent; -x removes.
 log "setting Samba password for '${USERNAME}'"
-( echo "$PASSWORD"; echo "$PASSWORD" ) | smbpasswd -s -a "$USERNAME"
+printf '%s\n%s\n' "$PASSWORD" "$PASSWORD" | smbpasswd -s -a "$USERNAME"
 
 # With HOST_READ_GID set the share is owned by that group and stays
 # group-readable, so the matching host user can read the backups directly.

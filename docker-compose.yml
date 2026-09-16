@@ -85,9 +85,13 @@ services:
       BACKUP_PATH: /backup
       DEFAULT_QUOTA_GB: ${DEFAULT_QUOTA_GB:-500}
       ENABLE_METRICS: ${ENABLE_METRICS:-true}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       TZ: ${TIMEZONE:-UTC}
       SAMBA_CONTAINER: timenest-samba
+      MAX_QUOTA_GB: ${MAX_QUOTA_GB:-100000}
+      SESSION_HTTPS_ONLY: ${SESSION_HTTPS_ONLY:-false}
+      USAGE_CACHE_TTL: ${USAGE_CACHE_TTL:-300}
     volumes:
       - ${BACKUP_PATH:?BACKUP_PATH must be set in .env}:/backup:ro
       - ./data/web:/data
