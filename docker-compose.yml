@@ -12,9 +12,6 @@
 # See README.md for per-platform notes, especially for Docker Desktop on
 # macOS where host networking must be enabled explicitly.
 
-networks:
-  proxy:
-    external: true
 
 services:
 
@@ -27,9 +24,6 @@ services:
     container_name: timenest-samba
     restart: unless-stopped
     network_mode: host
-    cap_add:
-      - NET_ADMIN
-      - SYS_ADMIN
     environment:
       SERVER_NAME: ${SERVER_NAME:-TimeNest}
       DEVICE_MODEL: ${DEVICE_MODEL:-TimeCapsule8,119}
@@ -58,8 +52,6 @@ services:
     container_name: timenest-avahi
     restart: unless-stopped
     network_mode: host
-    cap_add:
-      - NET_ADMIN
     environment:
       SERVER_NAME: ${SERVER_NAME:-TimeNest}
       DEVICE_MODEL: ${DEVICE_MODEL:-TimeCapsule8,119}
