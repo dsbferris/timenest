@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}TimeNest{% endblock %}</title>
     <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    {# htmx and Alpine used to be loaded here but nothing on any page used
+       them. Add them back next to the first feature that needs them. #}
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.3"></script>
-    <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="/static/app.css">
     <script>
     tailwind.config = {

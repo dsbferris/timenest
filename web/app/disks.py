@@ -6,6 +6,7 @@ import asyncio
 import json
 import logging
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -37,7 +38,7 @@ class SmartStatus:
 def usage(mount: Path | str) -> DiskUsage | None:
     try:
         s = psutil.disk_usage(str(mount))
-    except (FileNotFoundError, PermissionError):
+    except OSError:
         return None
     return DiskUsage(
         mount=str(mount),
@@ -48,16 +49,46 @@ def usage(mount: Path | str) -> DiskUsage | None:
     )
 
 
-async def smart(device: str) -> SmartStatus | None:
+# device -> (expires_at, status). smartctl wakes a sleeping drive, which on
+# a backup appliance is exactly what we do not want to do on every page
+# view, so results are cached for a good while.
+_smart_cache: dict[str, tuple[float, SmartStatus | None]] = {}
+
+
+async def smart_all(devices: list[str], ttl: int) -> list[SmartStatus]:
+    """Probe every device concurrently, skipping the ones that are cached."""
+    results = await asyncio.gather(*(smart(d, ttl) for d in devices))
+    return [r for r in results if r is not None]
+
+
+async def smart(device: str, ttl: int = 0) -> SmartStatus | None:
     """Run smartctl and parse the JSON output. Returns None if unavailable."""
-    proc = await asyncio.create_subprocess_exec(
-        "smartctl",
-        "-a",
-        "-j",
-        device,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
+    now = time.monotonic()
+    hit = _smart_cache.get(device)
+    if hit and hit[0] > now:
+        return hit[1]
+
+    result = await _probe(device)
+    if ttl:
+        _smart_cache[device] = (now + ttl, result)
+    return result
+
+
+async def _probe(device: str) -> SmartStatus | None:
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            "smartctl",
+            "-a",
+            "-j",
+            device,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except (FileNotFoundError, PermissionError) as exc:
+        # smartmontools missing, or the container cannot exec it. Same
+        # contract as any other unavailable device: degrade, don't 500.
+        log.debug("cannot run smartctl for %s: %s", device, exc)
+        return None
     stdout, stderr = await proc.communicate()
     if proc.returncode not in (0, 2, 4):
         # smartctl uses bitmask exit codes; 2 = "opened read-only", 4 =

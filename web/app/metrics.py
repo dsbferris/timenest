@@ -58,7 +58,9 @@ async def render(settings: Settings, mgr: samba_mgr.SambaManager) -> bytes:
         registry=registry,
     )
 
-    users = mgr.list_users()
+    # alist_users, not list_users: scanning the backup tree blocks, and a
+    # scrape must not stall the event loop for every other request.
+    users = await mgr.alist_users()
     users_gauge.set(len(users))
 
     sessions = await mgr.list_sessions()
@@ -66,7 +68,8 @@ async def render(settings: Settings, mgr: samba_mgr.SambaManager) -> bytes:
 
     for u in users:
         used_gauge.labels(user=u.username).set(u.used_bytes)
-        quota_gauge.labels(user=u.username).set(u.quota_gb * 1024**3)
+        if u.quota_gb is not None:
+            quota_gauge.labels(user=u.username).set(u.quota_gb * 1024**3)
         if u.last_backup_ts:
             last_backup_gauge.labels(user=u.username).set(u.last_backup_ts)
 

@@ -23,15 +23,25 @@
     <div class="font-medium text-ink-100 mb-2">Rotating the admin password</div>
     <pre class="bg-ink-950 rounded-md p-4 text-xs text-ink-200 overflow-x-auto"><code>$ sed -i 's/^ADMIN_PASSWORD=.*/ADMIN_PASSWORD=new-secret/' .env
 $ docker compose up -d web</code></pre>
-    <p class="mt-3">All sessions are invalidated automatically because the session
-    secret is derived from the admin password on restart.</p>
+    <p class="mt-3">Existing browser sessions stay valid: the session secret is
+    stored separately in <code class="text-ink-200">/data/.session_secret</code>
+    so a container update does not sign everyone out, and it is not derived
+    from the password. To force every session out, delete that file and
+    restart:</p>
+    <pre class="bg-ink-950 rounded-md p-4 text-xs text-ink-200 overflow-x-auto mt-2"><code>$ rm data/web/.session_secret
+$ docker compose up -d web</code></pre>
 </div>
 
 <div class="mt-6 rounded-xl border border-ink-800 bg-ink-900 p-6 text-sm text-ink-300 leading-relaxed">
     <div class="font-medium text-ink-100 mb-2">Prometheus metrics</div>
-    <p>Scrape target:</p>
+    <p><code class="text-ink-200">/metrics</code> is not public - it exposes every
+    username and backup size. A signed-in browser session can read it; Prometheus
+    needs a token. Set <code class="text-ink-200">METRICS_TOKEN</code> in
+    <code class="text-ink-200">.env</code>, then:</p>
     <pre class="bg-ink-950 rounded-md p-4 text-xs text-ink-200 overflow-x-auto mt-2"><code>scrape_configs:
   - job_name: timenest
+    authorization:
+      credentials: '&lt;METRICS_TOKEN&gt;'
     static_configs:
       - targets: ['timenest.local:8080']</code></pre>
 </div>
