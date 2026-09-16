@@ -49,8 +49,15 @@
                     <td class="px-5 py-3 text-ink-300">{{ u.last_backup_ts | ts }}</td>
                     <td class="px-5 py-3 text-right">
                         <form method="post" action="/users/{{ u.username }}/delete"
-                              onsubmit="return confirm('Remove {{ u.username }}? Backup data will be kept.');"
-                              class="inline">
+                              onsubmit="return confirm(this.purge.checked
+                                  ? 'Remove {{ u.username }} AND permanently delete every backup in {{ u.path }}? This cannot be undone.'
+                                  : 'Remove {{ u.username }}? Backup data will be kept.');"
+                              class="inline-flex items-center gap-2">
+                            <label class="text-xs text-ink-400 inline-flex items-center gap-1">
+                                <input type="checkbox" name="purge" value="1"
+                                       class="accent-red-500 align-middle">
+                                delete data
+                            </label>
                             <button class="text-xs text-red-400 hover:text-red-300">Remove</button>
                         </form>
                     </td>
