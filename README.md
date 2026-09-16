@@ -22,7 +22,7 @@ into a Time Machine target. Zero cables. Zero Apple Time Capsule. Zero iCloud up
 [![license](https://img.shields.io/github/license/momenbasel/timenest?style=flat-square)](LICENSE)
 [![platforms](https://img.shields.io/badge/platforms-amd64%20%7C%20arm64%20%7C%20armv7-blue?style=flat-square)](#supported-hardware)
 [![samba](https://img.shields.io/badge/samba-4.18%2B-green?style=flat-square)](https://www.samba.org/)
-[![python](https://img.shields.io/badge/python-3.11%2B-3776ab?style=flat-square)](https://www.python.org/)
+[![python](https://img.shields.io/badge/python-3.14%2B-3776ab?style=flat-square)](https://www.python.org/)
 
 <br>
 

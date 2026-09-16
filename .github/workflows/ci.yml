@@ -14,9 +14,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.14"
           cache: pip
-      - run: pip install ruff==0.8.4 mypy==1.13.0
+      - run: pip install ruff==0.16.7 mypy==2.3.1
       - run: ruff check web/
       - run: mypy --install-types --non-interactive --ignore-missing-imports web/
 

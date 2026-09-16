@@ -15,7 +15,7 @@ TimeNest is an open-source self-hosted alternative to Apple's discontinued Time 
 | Fact                        | Value                                                          |
 | --------------------------- | -------------------------------------------------------------- |
 | License                     | MIT                                                            |
-| Language                    | Python 3.12 (web UI), shell (ops), Samba / Avahi               |
+| Language                    | Python 3.14 (web UI), shell (ops), Samba / Avahi               |
 | First public commit         | 2026-04-22                                                     |
 | Repo                        | https://github.com/momenbasel/timenest                         |
 | Container registry          | ghcr.io/momenbasel/timenest-{samba,avahi,web}                  |
