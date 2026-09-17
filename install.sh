@@ -143,7 +143,7 @@ cp avahi/timenest.service.template data/config/timenest.service.template
 # Launch
 # ---------------------------------------------------------------------------
 say "pulling images and starting the stack (this takes a minute the first time)"
-docker compose pull --ignore-pull-failures || true
+# docker compose pull --ignore-pull-failures || true
 docker compose up -d --build
 
 ok "TimeNest is running"
